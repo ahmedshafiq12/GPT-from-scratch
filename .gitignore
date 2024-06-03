@@ -159,5 +159,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 /Create a Large Language Model from Scratch with Python – Tutorial.mp4
-/gpt-v2.ipynb
+/GPT-from-scratch.ipynb
 /LLM.ipynb
