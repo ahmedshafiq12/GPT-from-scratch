@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 class GPTLanguageModel(nn.Module):
     def __init__(self, n_embd, n_layer, n_head, dropout, block_size, batch_size, dataset_path, device="auto"):
-        print("🚀 Welcome!! I'm your GPT, developed by Ahmed Shafiq. 🚀")
+        print("🚀 Welcome!! I'm your ChatGPT, developed by Ahmed Shafiq. 🚀")
         self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
         print(f"🚀 I'm using {self.device} as a device")
 
