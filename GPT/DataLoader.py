@@ -1,11 +1,13 @@
 import torch
 import random
 import mmap
+import os
 
 
 class DataLoader:
-    def __init__(self, vocab_filepath, block_size, batch_size, train_filepath, val_filepath):
-        with open(vocab_filepath, 'r', encoding='utf-8') as f:
+    def __init__(self, block_size, batch_size, datapath):
+        self.vocab_filepath = os.path.join(datapath, "vocab.txt")
+        with open(self.vocab_filepath, 'r', encoding='utf-8') as f:
             text = f.read()
 
         self.chars = sorted(list(set(text)))
@@ -14,8 +16,8 @@ class DataLoader:
         self.int_to_string = {i: ch for i, ch in enumerate(self.chars)}
         self.block_size = block_size
         self.batch_size = batch_size
-        self.train_filepath = train_filepath
-        self.val_filepath = val_filepath
+        self.train_filepath = os.path.join(datapath, "output_train.txt")
+        self.val_filepath = os.path.join(datapath, "output_val.txt")
 
     def encode(self, s):
         return [self.string_to_int[c] for c in s]
