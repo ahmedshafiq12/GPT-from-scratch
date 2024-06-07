@@ -10,12 +10,12 @@ from tqdm import tqdm
 class GPTLanguageModel(nn.Module):
     def __init__(self, n_embd, n_layer, n_head, dropout, block_size, batch_size, dataset_path, device="auto"):
         print("🚀 Welcome!! I'm your GPT, developed by Ahmed Shafiq. 🚀")
-        self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device if device != "auto" else (0 if torch.cuda.is_available() else "cpu")
         print(f"🚀 I'm using {self.device} as a device")
 
         super().__init__()
 
-        self.dataloader = DataLoader(block_size, batch_size, dataset_path)
+        self.dataloader = DataLoader(block_size, batch_size, dataset_path, self.device)
         vocab_size = self.dataloader.vocab_size
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
@@ -84,7 +84,7 @@ class GPTLanguageModel(nn.Module):
                 print(f"step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
 
             # Sample a batch of data
-            xb, yb = self.dataloader.get_batch('train', self.device)
+            xb, yb = self.dataloader.get_batch('train')
 
             # Evaluate the loss
             logits, loss = self.forward(xb, yb)

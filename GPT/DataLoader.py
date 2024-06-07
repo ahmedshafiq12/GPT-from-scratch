@@ -5,11 +5,11 @@ import os
 
 
 class DataLoader:
-    def __init__(self, block_size, batch_size, dataset_path):
+    def __init__(self, block_size, batch_size, dataset_path, device):
         self.vocab_filepath = os.path.join(dataset_path, "vocab.txt")
         with open(self.vocab_filepath, 'r', encoding='utf-8') as f:
             text = f.read()
-
+        self.device = device
         self.chars = sorted(list(set(text)))
         self.vocab_size = len(self.chars)
         self.string_to_int = {ch: i for i, ch in enumerate(self.chars)}
@@ -44,10 +44,10 @@ class DataLoader:
                 data = torch.tensor(self.encode(decoded_block), dtype=torch.long)
         return data
 
-    def get_batch(self, split, device):
+    def get_batch(self, split):
         data = self.get_random_chunk(split)
         ix = torch.randint(len(data) - self.block_size, (self.batch_size,))
         x = torch.stack([data[i:i + self.block_size] for i in ix])
         y = torch.stack([data[i + 1:i + self.block_size + 1] for i in ix])
-        x, y = x.to(device), y.to(device)
+        x, y = x.to(self.device), y.to(self.device)
         return x, y
