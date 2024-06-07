@@ -10,7 +10,7 @@ from tqdm import tqdm
 class GPTLanguageModel(nn.Module):
     def __init__(self, n_embd, n_layer, n_head, dropout, block_size, batch_size, dataset_path, device="auto"):
         print("🚀 Welcome!! I'm your GPT, developed by Ahmed Shafiq. 🚀")
-        self.device = device if device != "auto" else (0 if torch.cuda.is_available() else "cpu")
+        self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
         print(f"🚀 I'm using {self.device} as a device")
 
         super().__init__()
@@ -49,14 +49,14 @@ class GPTLanguageModel(nn.Module):
             targets = targets.view(B * T)
             loss = F.cross_entropy(logits, targets)
 
-        return logits, loss
+        return logits.to(self.device), loss.to(self.device)
 
     def generate(self, index, max_new_tokens, block_size):
         for _ in range(max_new_tokens):
-            index_cond = index[:, -block_size:]
-            logits, loss = self.forward(index_cond.to(self.device))
+            index_cond = index[:, -block_size:].to(self.device)
+            logits, loss = self.forward(index_cond)
             logits = logits[:, -1, :]  # (B, C)
-            probs = F.softmax(logits, dim=-1)  # (B, C)
+            probs = F.softmax(logits, dim=-1).to(self.device)  # (B, C)
             index_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
             index = torch.cat((index, index_next), dim=1)  # (B, T+1)
         return index
