@@ -102,6 +102,11 @@ class GPTLanguageModel(nn.Module):
         # Save the model
         self.save_model("final_model.pt")
 
+    def talk(self, prompt):
+        context = torch.tensor(self.dataloader.encode(prompt), dtype=torch.long, device=self.device)
+        generated_chars = self.dataloader.decode(self.generate(context.unsqueeze(0), max_new_tokens=100)[0].tolist())
+        return generated_chars
+
     def save_model(self, file_name):
         file_path = os.path.join(self.saving_dir, file_name)
         torch.save(self, file_path)
