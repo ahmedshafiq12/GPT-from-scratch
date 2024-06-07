@@ -5,8 +5,8 @@ import os
 
 
 class DataLoader:
-    def __init__(self, block_size, batch_size, datapath):
-        self.vocab_filepath = os.path.join(datapath, "vocab.txt")
+    def __init__(self, block_size, batch_size, dataset_path):
+        self.vocab_filepath = os.path.join(dataset_path, "vocab.txt")
         with open(self.vocab_filepath, 'r', encoding='utf-8') as f:
             text = f.read()
 
@@ -16,8 +16,8 @@ class DataLoader:
         self.int_to_string = {i: ch for i, ch in enumerate(self.chars)}
         self.block_size = block_size
         self.batch_size = batch_size
-        self.train_filepath = os.path.join(datapath, "output_train.txt")
-        self.val_filepath = os.path.join(datapath, "output_val.txt")
+        self.train_filepath = os.path.join(dataset_path, "output_train.txt")
+        self.val_filepath = os.path.join(dataset_path, "output_val.txt")
 
     def encode(self, s):
         return [self.string_to_int[c] for c in s]
