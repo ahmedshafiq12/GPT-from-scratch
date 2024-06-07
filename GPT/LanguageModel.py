@@ -82,7 +82,7 @@ class GPTLanguageModel(nn.Module):
         for iter in tqdm(range(max_iters)):
             if iter % eval_iters == 0:
                 losses = self.estimate_loss(eval_iters)
-                print(f"step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
+                print(f"\n step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
 
             # Sample a batch of data
             xb, yb = self.dataloader.get_batch('train')
