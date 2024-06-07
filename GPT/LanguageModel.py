@@ -68,7 +68,7 @@ class GPTLanguageModel(nn.Module):
         for split in ['train', 'val']:
             losses = torch.zeros(eval_iters)
             for k in range(eval_iters):
-                X, Y = self.dataloader.get_batch(split, self.device)
+                X, Y = self.dataloader.get_batch(split)
                 logits, loss = self.forward(X, Y)
                 losses[k] = loss.item()
             out[split] = losses.mean().item()
