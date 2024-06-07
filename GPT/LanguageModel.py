@@ -5,6 +5,7 @@ from .Block import Block
 from .DataLoader import DataLoader
 import pickle
 from tqdm import tqdm
+import os
 
 
 class GPTLanguageModel(nn.Module):
@@ -24,6 +25,8 @@ class GPTLanguageModel(nn.Module):
         self.lm_head = nn.Linear(n_embd, vocab_size)
         self.apply(self._init_weights)
         self.to(self.device)
+        self.saving_dir = "weights"
+        os.makedirs(self.saving_dir, exist_ok=True)
 
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
@@ -82,7 +85,8 @@ class GPTLanguageModel(nn.Module):
         for iter in tqdm(range(max_iters)):
             if iter % eval_iters == 0:
                 losses = self.estimate_loss(eval_iters)
-                print(f"\n step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
+                print(f"\n ✅ step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
+                self.save_model(f"{iter}_epochs_model.pt")
 
             # Sample a batch of data
             xb, yb = self.dataloader.get_batch('train')
@@ -96,17 +100,14 @@ class GPTLanguageModel(nn.Module):
         print(loss.item())
 
         # Save the model
-        self.save_model("model.pkl")
-        print("Model saved")
+        self.save_model("final_model.pt")
 
-    def save_model(self, filepath):
-        with open(filepath, 'wb') as f:
-            pickle.dump(self, f)
+    def save_model(self, file_name):
+        file_path = os.path.join(self.saving_dir, file_name)
+        torch.save(self, file_path)
+        print(f"\n 💾 Model: {file_name} saved")
 
-    @classmethod
-    def load_model(cls, filepath, device):
-        with open(filepath, 'rb') as f:
-            model = pickle.load(f)
-        model.device = device
-        model.to(device)
+    def load_model(self, file_path):
+        model = torch.load(file_path)
+        model.to(self.device)
         return model
