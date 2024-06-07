@@ -54,7 +54,7 @@ class GPTLanguageModel(nn.Module):
     def generate(self, index, max_new_tokens, block_size):
         for _ in range(max_new_tokens):
             index_cond = index[:, -block_size:]
-            logits, loss = self.forward(index_cond)
+            logits, loss = self.forward(index_cond.to(self.device))
             logits = logits[:, -1, :]  # (B, C)
             probs = F.softmax(logits, dim=-1)  # (B, C)
             index_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
