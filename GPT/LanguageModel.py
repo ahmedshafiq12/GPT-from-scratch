@@ -74,7 +74,7 @@ class GPTLanguageModel(nn.Module):
         self.train()
         return out
 
-    def train(self, max_iters, eval_iters, learning_rate=5e-4):
+    def train_model(self, max_iters, eval_iters, learning_rate=5e-4):
         optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate)
 
         for iter in range(max_iters):
