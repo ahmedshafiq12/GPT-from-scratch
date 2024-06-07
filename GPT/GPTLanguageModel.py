@@ -2,19 +2,25 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .Block import Block
+from .DataLoader import DataLoader
+import pickle
 
 
 class GPTLanguageModel(nn.Module):
-    def __init__(self, vocab_size, n_embd, block_size, n_layer, n_head, dropout, device="auto"):
+    def __init__(self, vocab_size, n_embd, n_layer, n_head, dropout, vocab_filepath, block_size, batch_size, train_filepath, val_filepath, device="auto"):
+        print("🚀 Welcome!! I'm your GPT, developed by Ahmed Shafiq. 🚀")
+        self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
+        print(f"🚀 I'm using {self.device} as a device")
+
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
         self.blocks = nn.Sequential(*[Block(n_embd, n_head, block_size, dropout) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_embd)  # final layer norm
         self.lm_head = nn.Linear(n_embd, vocab_size)
-        self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
-
         self.apply(self._init_weights)
+
+        self.dataloader = DataLoader(vocab_filepath, block_size, batch_size, train_filepath, val_filepath)
 
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
@@ -52,3 +58,53 @@ class GPTLanguageModel(nn.Module):
             index_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
             index = torch.cat((index, index_next), dim=1)  # (B, T+1)
         return index
+
+    @torch.no_grad()
+    def estimate_loss(self, eval_iters=10):
+        out = {}
+        self.eval()
+        for split in ['train', 'val']:
+            losses = torch.zeros(eval_iters)
+            for k in range(eval_iters):
+                X, Y = self.dataloader.get_batch(split, self.device)
+                logits, loss = self.forward(X, Y)
+                losses[k] = loss.item()
+            out[split] = losses.mean().item()
+        self.train()
+        return out
+
+    def train_model(self, max_iters, eval_iters, learning_rate=5e-4):
+        optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate)
+
+        for iter in range(max_iters):
+            print(iter)
+            if iter % eval_iters == 0:
+                losses = self.estimate_loss(eval_iters)
+                print(f"step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
+
+            # Sample a batch of data
+            xb, yb = self.dataloader.get_batch('train', self.device)
+
+            # Evaluate the loss
+            logits, loss = self.forward(xb, yb)
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            optimizer.step()
+
+        print(loss.item())
+
+        # Save the model
+        self.save_model("model.pkl")
+        print("Model saved")
+
+    def save_model(self, filepath):
+        with open(filepath, 'wb') as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load_model(cls, filepath, device):
+        with open(filepath, 'rb') as f:
+            model = pickle.load(f)
+        model.device = device
+        model.to(device)
+        return model
