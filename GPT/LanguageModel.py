@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from .Block import Block
 from .DataLoader import DataLoader
 import pickle
+from tqdm import tqdm
 
 
 class GPTLanguageModel(nn.Module):
@@ -77,8 +78,7 @@ class GPTLanguageModel(nn.Module):
     def train_model(self, max_iters, eval_iters, learning_rate=5e-4):
         optimizer = torch.optim.AdamW(self.parameters(), lr=learning_rate)
 
-        for iter in range(max_iters):
-            print(iter)
+        for iter in tqdm(range(max_iters)):
             if iter % eval_iters == 0:
                 losses = self.estimate_loss(eval_iters)
                 print(f"step: {iter}, train loss: {losses['train']:.3f}, val loss: {losses['val']:.3f}")
