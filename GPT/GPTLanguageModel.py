@@ -7,20 +7,21 @@ import pickle
 
 
 class GPTLanguageModel(nn.Module):
-    def __init__(self, vocab_size, n_embd, n_layer, n_head, dropout, vocab_filepath, block_size, batch_size, train_filepath, val_filepath, device="auto"):
+    def __init__(self, n_embd, n_layer, n_head, dropout, vocab_filepath, block_size, batch_size, train_filepath, val_filepath, device="auto"):
         print("🚀 Welcome!! I'm your GPT, developed by Ahmed Shafiq. 🚀")
         self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
         print(f"🚀 I'm using {self.device} as a device")
 
         super().__init__()
+
+        self.dataloader = DataLoader(vocab_filepath, block_size, batch_size, train_filepath, val_filepath)
+        vocab_size = self.dataloader.vocab_size
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
         self.blocks = nn.Sequential(*[Block(n_embd, n_head, block_size, dropout) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(n_embd)  # final layer norm
         self.lm_head = nn.Linear(n_embd, vocab_size)
         self.apply(self._init_weights)
-
-        self.dataloader = DataLoader(vocab_filepath, block_size, batch_size, train_filepath, val_filepath)
 
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
