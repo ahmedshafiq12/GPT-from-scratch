@@ -10,6 +10,12 @@ import os
 
 class GPTLanguageModel(nn.Module):
     def __init__(self, n_embd, n_layer, n_head, dropout, block_size, batch_size, dict_path="dicts/vocab.txt", dataset_path="", device="auto"):
+        self.n_embd = n_embd
+        self.n_layer = n_layer
+        self.n_head = n_head
+        self.dropout = dropout
+        self.block_size = block_size
+        self.batch_size = batch_size
         print("🚀 Welcome!! I'm your ChatGPT, developed by Ahmed Shafiq. 🚀")
         self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
         print(f"🚀 I'm using {self.device} as a device")
@@ -55,9 +61,9 @@ class GPTLanguageModel(nn.Module):
 
         return logits.to(self.device), loss.to(self.device)
 
-    def generate(self, index, max_new_tokens, block_size):
+    def generate(self, index, max_new_tokens):
         for _ in range(max_new_tokens):
-            index_cond = index[:, -block_size:].to(self.device)
+            index_cond = index[:, -self.block_size:].to(self.device)
             logits, loss = self.forward(index_cond)
             logits = logits[:, -1, :]  # (B, C)
             probs = F.softmax(logits, dim=-1).to(self.device)  # (B, C)
