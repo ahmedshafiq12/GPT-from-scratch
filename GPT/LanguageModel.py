@@ -59,7 +59,7 @@ class GPTLanguageModel(nn.Module):
             targets = targets.view(B * T)
             loss = F.cross_entropy(logits, targets)
 
-        return logits.to(self.device), loss.to(self.device)
+        return logits, loss
 
     def generate(self, index, max_new_tokens):
         for _ in range(max_new_tokens):
