@@ -9,14 +9,14 @@ import os
 
 
 class GPTLanguageModel(nn.Module):
-    def __init__(self, n_embd, n_layer, n_head, dropout, block_size, batch_size, dataset_path, device="auto"):
+    def __init__(self, n_embd, n_layer, n_head, dropout, block_size, batch_size, dict_path="dicts/vocab.txt", dataset_path="", device="auto"):
         print("🚀 Welcome!! I'm your ChatGPT, developed by Ahmed Shafiq. 🚀")
         self.device = device if device != "auto" else ("cuda" if torch.cuda.is_available() else "cpu")
         print(f"🚀 I'm using {self.device} as a device")
 
         super().__init__()
 
-        self.dataloader = DataLoader(block_size, batch_size, dataset_path, self.device)
+        self.dataloader = DataLoader(block_size, batch_size, dict_path, dataset_path, self.device)
         vocab_size = self.dataloader.vocab_size
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
@@ -113,6 +113,5 @@ class GPTLanguageModel(nn.Module):
         print(f"\n 💾 Model: {file_name} saved")
 
     def load_model(self, file_path):
-        model = torch.load(file_path)
-        model.to(self.device)
-        return model
+        self = torch.load(file_path)
+        self.to(self.device)

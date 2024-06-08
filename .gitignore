@@ -163,3 +163,4 @@ cython_debug/
 /LLM.ipynb
 /gpt-v1.ipynb
 /openwebtext
+/weights/

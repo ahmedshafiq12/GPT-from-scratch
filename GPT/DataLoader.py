@@ -5,9 +5,8 @@ import os
 
 
 class DataLoader:
-    def __init__(self, block_size, batch_size, dataset_path, device):
-        self.vocab_filepath = os.path.join(dataset_path, "vocab.txt")
-        with open(self.vocab_filepath, 'r', encoding='utf-8') as f:
+    def __init__(self, block_size, batch_size, dict_path, dataset_path, device):
+        with open(dict_path, 'r', encoding='utf-8') as f:
             text = f.read()
         self.device = device
         self.chars = sorted(list(set(text)))
